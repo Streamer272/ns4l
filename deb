@@ -1,0 +1,6 @@
+Package: ns4l
+Version: 1.0.0
+Maintainer: Daniel Svitan <daniel@svitan.dev>
+Depends: libbluetooth-dev
+Architecture: amd64
+Description: Nearby Share 4 Linux

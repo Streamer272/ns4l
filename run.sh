@@ -4,10 +4,8 @@ GREEN="\e[32m"
 RESET="\e[0m"
 RUN="$GREEN[RUN]$RESET"
 
-echo "$RUN Compiling..."
-gcc main.c -o out -lbluetooth
+echo "$RUN Building..."
+./build.sh
 echo "$RUN Running..."
-./out
-echo "$RUN Cleaning..."
-rm out
+./build/out
 echo "$RUN Finished"
