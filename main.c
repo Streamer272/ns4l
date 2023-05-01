@@ -10,6 +10,8 @@
 #include <unistd.h>
 
 #define MAX_DEVICE_COUNT 256
+// 1.28 * x seconds
+#define DISCOVER_PERIOD 1
 #define MAX_NAME_LENGTH 256
 #define BD_ADDR_LENGTH 18
 #define CHAR_CASE 32
@@ -19,24 +21,24 @@ void byebye(char *message);
 void *alloc(size_t size);
 char lower(char ch);
 
+// https://people.csail.mit.edu/albert/bluez-intro/c404.html
 int main(int argc, char **argv) {
   // devices list
   inquiry_info *devices = NULL;
   int device_count;
-  int dev_id, sock, len, flags;
+  int module_id, module, flags;
 
-  dev_id = hci_get_route(NULL);
-  sock = hci_open_dev(dev_id);
-  if (dev_id < 0 || sock < 0)
+  module_id = hci_get_route(NULL);
+  module = hci_open_dev(module_id);
+  if (module_id < 0 || module < 0)
     byebye("opening socket");
 
-  len = 8;
   flags = IREQ_CACHE_FLUSH;
   devices = malloc(MAX_DEVICE_COUNT * sizeof(inquiry_info));
 
-  // discover devices
-  device_count =
-      hci_inquiry(dev_id, len, MAX_DEVICE_COUNT, NULL, &devices, flags);
+  printf("Discovering devices...");
+  device_count = hci_inquiry(module_id, DISCOVER_PERIOD, MAX_DEVICE_COUNT, NULL,
+                             &devices, flags);
   if (device_count < 0)
     byebye("hci_inquiry (discovery)");
 
@@ -51,7 +53,7 @@ int main(int argc, char **argv) {
     fflush(stdout);
 
     int read_result =
-        hci_read_remote_name(sock, &device.bdaddr, MAX_NAME_LENGTH, name, 0);
+        hci_read_remote_name(module, &device.bdaddr, MAX_NAME_LENGTH, name, 0);
     if (read_result < 0)
       strcpy(name, "unknown");
     printf("\r%d. [%s] %s\n", i, addr, name);
@@ -67,7 +69,7 @@ int main(int argc, char **argv) {
   }
 
   free(devices);
-  close(sock);
+  close(module);
 
   return EXIT_SUCCESS;
 }
