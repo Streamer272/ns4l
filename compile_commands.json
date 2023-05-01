@@ -1,0 +1,17 @@
+[
+    {
+        "directory": "/home/daniel/Projects/ns4l",
+        "file": "main.c",
+        "output": "out",
+        "arguments": [
+            "/usr/lib/llvm-15/bin/clang",
+            "-xc",
+            "main.c",
+            "-o",
+            "out",
+            "-std=c18",
+            "-c",
+            "--target=x86_64-pc-linux-gnu"
+        ]
+    }
+]
