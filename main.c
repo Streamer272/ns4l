@@ -10,11 +10,11 @@
 #include <unistd.h>
 
 #define MAX_DEVICE_COUNT 256
-// 1.28 * x seconds
-#define DISCOVER_PERIOD 1
 #define MAX_NAME_LENGTH 256
 #define BD_ADDR_LENGTH 18
 #define CHAR_CASE 32
+#define INPUT_SIZE 64
+#define DEFAULT_DISCOVER_PERIOD 1
 #define TAB "  "
 
 void byebye(char *message);
@@ -27,6 +27,16 @@ int main(int argc, char **argv) {
   inquiry_info *devices = NULL;
   int device_count;
   int module_id, module, flags;
+  // 1.28 * x seconds
+  int discover_period;
+  char *input = alloc(sizeof(char) * 64);
+
+  printf("Enter discover period [%d is default]: ", DEFAULT_DISCOVER_PERIOD);
+  fgets(input, INPUT_SIZE, stdin);
+  if (input[0] == '\n')
+    discover_period = DEFAULT_DISCOVER_PERIOD;
+  else
+    discover_period = atoi(input);
 
   module_id = hci_get_route(NULL);
   module = hci_open_dev(module_id);
@@ -36,8 +46,8 @@ int main(int argc, char **argv) {
   flags = IREQ_CACHE_FLUSH;
   devices = malloc(MAX_DEVICE_COUNT * sizeof(inquiry_info));
 
-  printf("Discovering devices...");
-  device_count = hci_inquiry(module_id, DISCOVER_PERIOD, MAX_DEVICE_COUNT, NULL,
+  printf("Discovering devices...\n");
+  device_count = hci_inquiry(module_id, discover_period, MAX_DEVICE_COUNT, NULL,
                              &devices, flags);
   if (device_count < 0)
     byebye("hci_inquiry (discovery)");
@@ -58,14 +68,16 @@ int main(int argc, char **argv) {
       strcpy(name, "unknown");
     printf("\r%d. [%s] %s\n", i, addr, name);
 
-    char *input = alloc(sizeof(char) * 64);
     printf("%sConnect? [y/N] ", TAB);
-    fgets(input, 16, stdin);
+    memset(input, 0, INPUT_SIZE);
+    fgets(input, INPUT_SIZE, stdin);
     if (lower(input[0]) != 'y') {
       printf("%sSkipping\n", TAB);
       continue;
     }
+
     printf("%sConnecting...\n", TAB);
+    break;
   }
 
   free(devices);
