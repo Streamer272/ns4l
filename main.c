@@ -33,10 +33,9 @@ int main(int argc, char **argv) {
 
   printf("Enter discover period [%d is default]: ", DEFAULT_DISCOVER_PERIOD);
   fgets(input, INPUT_SIZE, stdin);
-  if (input[0] == '\n')
+  discover_period = atoi(input);
+  if (discover_period <= 0)
     discover_period = DEFAULT_DISCOVER_PERIOD;
-  else
-    discover_period = atoi(input);
 
   module_id = hci_get_route(NULL);
   module = hci_open_dev(module_id);
